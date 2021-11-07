@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-
-using System.Drawing;
-using System.Linq.Expressions;
-//using System.Drawing.Imaging;
 
 namespace WordOfTanks
 {
@@ -30,10 +27,9 @@ namespace WordOfTanks
         White
     }
     class Player
-    {
-        
+    {        
         public string _Name { get; set; }
-        public int _score { get; set; }      
+        public int _score { get; set; }
 
         public Player(string name, int score)
         {
@@ -42,8 +38,6 @@ namespace WordOfTanks
         }
 
         public string name;
-  
-
     }
     abstract class Tank
     {
@@ -56,33 +50,35 @@ namespace WordOfTanks
         public int coordinationY { get; set; }
 
         public Tank(int amunition, int hp, int maneuverability)
-        {            
+        {
             Ammunition = amunition;
             HP = hp;
             Maneuverability = maneuverability;
         }
 
-        //private Color color;
-
-        //public Color TankColor
-        //{
-        //    get { return color; }
-        //    set { color = Color.Cyan; }
-        //}
-
         public Color color { get; set; }
 
         public abstract void Print();
 
+        public static Tank operator* (Tank t1, Tank t2)
+        {
+            return t1 ^ t2;
+        }
+
+        public static Tank operator ^(Tank t1, Tank t2)
+        {
+            int hpT1 = (t1.HP - t2.Ammunition) * t1.Maneuverability;
+            int hpT2 = (t2.HP - t1.Ammunition) * t2.Maneuverability;
+            
+            return hpT1 > hpT2 ? t1 : t2;
+        }
+
         public override string ToString()
         {
-            Console.ForegroundColor = (ConsoleColor)color;
-
-            return $"Танк: {Name}\n" +
-            $"Боекомплект танка: {Ammunition}\n" +
-                $"Уровень брони: {HP}\n" +
-                $"Маневренность: {Maneuverability}";
-               // $"Color: {color}" ;            
+            return $"Танк: {Name} " +
+            $"Боекомплект танка: {Ammunition} " +
+                $"Уровень брони: {HP} " +
+                $"Маневренность: {Maneuverability}";                     
         }
 
         public static void ResetConsole()
@@ -146,17 +142,15 @@ namespace WordOfTanks
 
             Console.WriteLine($"Маневренность: {Maneuverability}");
             Tank.ResetConsole();
-        }
 
-        
+            
+        }       
 
         public override string ToString()
         {
-            // Console.ForegroundColor = (ConsoleColor)color;
-            
-            return base.ToString();
-        }   
-
+            this.player._score++;
+            return $"Игрок {player._Name} " + base.ToString();
+        }  
     }
 
     class Pantera : Tank
@@ -178,7 +172,6 @@ namespace WordOfTanks
                     this.coordinationX = 0;
                     this.coordinationY = 0;
                 }                
-                
             }
 
             else
@@ -207,14 +200,13 @@ namespace WordOfTanks
 
             Console.WriteLine($"Маневренность: {Maneuverability}");
             Tank.ResetConsole();
+            
         }
         public override string ToString()
         {
-            // Console.ForegroundColor = (ConsoleColor)color;
-
-            return base.ToString();
+            this.player._score++;
+            return $"Игрок {player._Name} " + base.ToString();
         }
-
     }
 
     class Program
@@ -222,10 +214,7 @@ namespace WordOfTanks
         static void Main(string[] args)
         {
             Console.Title = "WordOfTanks";
-            //Console.BackgroundColor = ConsoleColor.Black;
-            //Console.ForegroundColor = ConsoleColor.DarkGreen;
-
-            //int amunition, hp, maneuverability;
+           
             Random rnd = new Random();
 
             Player p1 = new Player("Марго", 0);
@@ -233,120 +222,94 @@ namespace WordOfTanks
             Player p2 = new Player("Александр", 0);
             p2.name = nameof(p2);
 
-            Random rnd2 = new Random();
-
-            Tank tank1 = new T34(p1, rnd.Next(1, 100), rnd.Next(1, 100), rnd.Next(1, 100));
-            Tank tank2 = new Pantera(p2, rnd.Next(1, 100), rnd.Next(1, 100), rnd.Next(1, 100));
-
-            Tank[] tanks = new Tank[] { tank1, tank2 };
-
             Tank[] tanks1 = new Tank[12];
 
-           
+            //коэффициент шанса выпадания Т34
+            double trueProbability = 0.2;
+            bool result;
 
             for (int i = 0; i < tanks1.Length; i+=2)
             {
-                double trueProbability = 0.2;
-                bool result = rnd.NextDouble() < trueProbability;
+                result = rnd.NextDouble() < trueProbability;               
 
                 if (result)
                 {
-                    result = rnd.NextDouble() < trueProbability;
-
-                    if (result)
-                    {
-                        tanks1[i] = new T34(p1, rnd.Next(1, 100), rnd.Next(1, 100), rnd.Next(1, 100));
-                    }
-
-                    else
-                    {
-                        tanks1[i] = new Pantera(p1, rnd.Next(1, 100), rnd.Next(1, 100), rnd.Next(1, 100));
-
-                    }
-
-                    result = rnd.NextDouble() < trueProbability;
-
-                    if (result)
-                    {
-                        tanks1[i + 1] = new T34(p2, rnd.Next(1, 100), rnd.Next(1, 100), rnd.Next(1, 100));
-                    }
-
-                    else
-                    {
-                        tanks1[i + 1] = new Pantera(p2, rnd.Next(1, 100), rnd.Next(1, 100), rnd.Next(1, 100));
-
-                    }
+                    tanks1[i] = new T34(p1, rnd.Next(1, 100), rnd.Next(1, 100), rnd.Next(1, 100));
                 }
 
                 else
                 {
-
-                    result = rnd.NextDouble() < trueProbability;
-
-                    if (result)
-                    {
-                        tanks1[i] = new T34(p1, rnd.Next(1, 100), rnd.Next(1, 100), rnd.Next(1, 100));
-                    }
-
-                    else
-                    {
-                        tanks1[i] = new Pantera(p1, rnd.Next(1, 100), rnd.Next(1, 100), rnd.Next(1, 100));
-
-                    }
-
-                    result = rnd.NextDouble() < trueProbability;
-
-                    if (result)
-                    {
-                        tanks1[i + 1] = new T34(p2, rnd.Next(1, 100), rnd.Next(1, 100), rnd.Next(1, 100));
-                    }
-
-                    else
-                    {
-                        tanks1[i + 1] = new Pantera(p2, rnd.Next(1, 100), rnd.Next(1, 100), rnd.Next(1, 100));
-
-                    }
-
+                    tanks1[i] = new Pantera(p1, rnd.Next(1, 100), rnd.Next(1, 100), rnd.Next(1, 100));
                 }
 
+                result = rnd.NextDouble() < trueProbability;
+
+                if (result)
+                {
+                    tanks1[i + 1] = new T34(p2, rnd.Next(1, 100), rnd.Next(1, 100), rnd.Next(1, 100));
+                }
+
+                else
+                {
+                    tanks1[i + 1] = new Pantera(p2, rnd.Next(1, 100), rnd.Next(1, 100), rnd.Next(1, 100));
+                } 
             }
 
             for (int i = 0; i < tanks1.Length; i++)
             {
-                tanks1[i].Print();
-              
-               if (i < tanks1.Length - 2)
+                if (i % 2 == 0)
+                {                    
+                    Console.SetCursorPosition(0, tanks1[i].coordinationY + 6);
+                    Console.Write("Результат битвы: ");
+                    Tank buttle = tanks1[i] * tanks1[i + 1];
+                    Console.Write($"победитель {buttle}");
+                }
+
+                tanks1[i].Print();                
+
+                if (i < tanks1.Length - 2)
                 {
                     if (i % 10 == 0)
-                    {
+                    {  
                         tanks1[i + 2].coordinationX = tanks1[i].coordinationX;
-                        tanks1[i + 2].coordinationY = tanks1[i].coordinationY + 2;
+                        tanks1[i + 2].coordinationY = tanks1[i].coordinationY + 4;
                     }
 
                     else
-                    {
+                    {  
                         tanks1[i + 2].coordinationX = tanks1[i].coordinationX;
-                        tanks1[i + 2].coordinationY = tanks1[i].coordinationY + 2;
-                    }
-                    
-                }        
-                
-                
+                        tanks1[i + 2].coordinationY = tanks1[i].coordinationY + 4;
+                    }                    
+                }
+
+                //Thread.Sleep(100);
+
             }
 
-            //foreach (var item in tanks1)
-            //{
-                
-            //    item.Print();
-            //}
-            //tank1.Print();
-            //Console.WriteLine(tank1);
+            Console.WriteLine("\n\n");
+            Console.WriteLine($"Итог сражения для игрока {p1._Name}: набрал(а) {p1._score} очка(ов)");
+            Console.WriteLine($"Итог сражения для игрока {p2._Name}: набрал(а) {p2._score} очка(ов)");
 
-            // tank2.Print();
-            //Console.WriteLine(tank2);
+            string nameWinner;
 
+            if (p1._score > p2._score)
+            {
+                nameWinner = p1._Name;                
+            }
 
-            //Console.ForegroundColor = ConsoleColor.White;
+            else if (p1._score == p2._score)
+            {
+                nameWinner = "Нет победителя";
+            }
+
+            else
+            {
+                nameWinner = p2._Name;
+            }
+
+            Console.WriteLine($"Победитель {nameWinner}");
+
+            Console.WriteLine("\n\n\n\n");
         }
     }
 }
