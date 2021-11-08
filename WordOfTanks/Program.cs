@@ -26,6 +26,7 @@ namespace WordOfTanks
         Yellow,
         White
     }
+
     class Player
     {        
         public string _Name { get; set; }
@@ -59,6 +60,8 @@ namespace WordOfTanks
         public Color color { get; set; }
 
         public abstract void Print();
+
+        public abstract void playerScore();
 
         public static Tank operator* (Tank t1, Tank t2)
         {
@@ -103,6 +106,11 @@ namespace WordOfTanks
             this.player = player;
             this.color = Color.Cyan;
         }
+
+        public override void playerScore()
+        {
+            this.player._score++;
+        }
         public override void Print()
         {
             Tank.ResetConsole();
@@ -141,14 +149,11 @@ namespace WordOfTanks
             Console.SetCursorPosition(this.coordinationX, this.coordinationY +=  1);
 
             Console.WriteLine($"Маневренность: {Maneuverability}");
-            Tank.ResetConsole();
-
-            
+            Tank.ResetConsole();            
         }       
 
         public override string ToString()
-        {
-            this.player._score++;
+        {           
             return $"Игрок {player._Name} " + base.ToString();
         }  
     }
@@ -161,6 +166,11 @@ namespace WordOfTanks
             Name = "Pantera";
             this.player = player;
             this.color = Color.DarkGreen;
+        }
+
+        public override void playerScore()
+        {
+            this.player._score++;
         }
         public override void Print()
         {
@@ -203,8 +213,7 @@ namespace WordOfTanks
             
         }
         public override string ToString()
-        {
-            this.player._score++;
+        {            
             return $"Игрок {player._Name} " + base.ToString();
         }
     }
@@ -262,6 +271,10 @@ namespace WordOfTanks
                     Console.SetCursorPosition(0, tanks1[i].coordinationY + 6);
                     Console.Write("Результат битвы: ");
                     Tank buttle = tanks1[i] * tanks1[i + 1];
+
+                    //увеличиваем количество побед у победителя
+                    buttle.playerScore();
+
                     Console.Write($"победитель {buttle}");
                 }
 
@@ -290,7 +303,7 @@ namespace WordOfTanks
             Console.WriteLine($"Итог сражения для игрока {p1._Name}: набрал(а) {p1._score} очка(ов)");
             Console.WriteLine($"Итог сражения для игрока {p2._Name}: набрал(а) {p2._score} очка(ов)");
 
-            string nameWinner;
+            string nameWinner;            
 
             if (p1._score > p2._score)
             {
