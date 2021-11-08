@@ -150,7 +150,7 @@ namespace WordOfTanks
 
             Console.WriteLine($"Маневренность: {Maneuverability}");
             Tank.ResetConsole();            
-        }       
+        }      
 
         public override string ToString()
         {           
@@ -167,7 +167,6 @@ namespace WordOfTanks
             this.player = player;
             this.color = Color.DarkGreen;
         }
-
         public override void playerScore()
         {
             this.player._score++;
